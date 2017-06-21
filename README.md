@@ -36,7 +36,7 @@ import 'videojs-responsive-controls';
 
 player.responsiveControls({
     controls: {
-      currentTimeDisplay: { mini: false, mobile: false },
+      remainingTimeDisplay: { mini: false, mobile: false },
       'vjs-resolution-button': { mini: false },
       'vjs-language-container': { mini: false }
     }
@@ -91,7 +91,7 @@ player.responsiveControls({
         custom: 1024,
     },
     controls: {
-        currentTimeDisplay: { custom: false }
+        remainingTimeDisplay: { custom: false }
     }
 });
 ```
@@ -108,7 +108,7 @@ player.responsiveControls({
         custom: 1024,
     },
     controls: {
-        currentTimeDisplay: { custom: false }
+        remainingTimeDisplay: { custom: false }
     }
 });
 ```
@@ -120,7 +120,7 @@ To hide element by default use `default` breakpoint:
 ```js
 player.responsiveControls({
     controls: {
-        currentTimeDisplay: { default: false, mini: true }
+        remainingTimeDisplay: { default: false, mini: true }
     }
 });
 ```

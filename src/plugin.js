@@ -160,28 +160,11 @@ const setup = (player, { sizes, controls }) => {
 /**
  * Initializes new instance of resize detector
  *
- * @return     {ElementResizeDetextor} Detector instance
+ * @return     {ElementResizeDetector} Detector instance
  */
 const newDetector = () => {
   return elementResizeDetectorMaker({ strategy: "scroll" });
 }
-
-/**
- * Sets up event listener looking for changes in size of the video player
- * and fire initial setup straight away.
- *
- * @function init
- * @param    {Player} player A Video.js player object.
- *
- * @param    {Object} [settings={}]
- *           Object containing settings for the plugin.
- */
-const onPlayerReady = (player, settings) => {
-  player.addClass('vjs-responsive-controls');
-  window.resizeDetector = window.resizeDetector || newDetector();
-  window.resizeDetector.listenTo(player.el(), () => setup(player, settings));
-  setup(player, settings);
-};
 
 /**
  * Overwrites default breakpoints with ones specified by the developer.
@@ -202,7 +185,7 @@ const getMediaQueries = (settings, defaults) => (
  * @param      {Object}  defaults  Default settings for plugin.
  * @return     {Object}  Settings to be applied.
  */
-const mergeUsersSettings = (settings, defaults) => (
+const mergeUserSettings = (settings, defaults) => (
   settings && settings.controls ?
   videojs.mergeOptions(defaults.controls, settings.controls) :
   defaults.controls
@@ -223,13 +206,12 @@ const mergeUsersSettings = (settings, defaults) => (
 const responsiveControls = function(userSettings) {
   const settings = {
     sizes: getMediaQueries(userSettings, defaults),
-    controls: mergeUsersSettings(userSettings, defaults),
+    controls: mergeUserSettings(userSettings, defaults),
   };
 
   this.addClass('vjs-responsive-controls');
   window.resizeDetector = window.resizeDetector || newDetector();
   window.resizeDetector.listenTo(this.el(), () => setup(this, settings));
-  // setup(player, settings);
 };
 
 // Register the plugin with video.js.

@@ -63,7 +63,6 @@
   "dependencies": {
     "element-resize-detector": "^1.1.12",
     "global": "^4.3.2",
-    "javascript-detect-element-resize": "^0.5.3",
     "lodash": "^4.17.4",
     "video.js": "^5.19.2"
   },
