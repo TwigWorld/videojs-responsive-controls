@@ -8,21 +8,22 @@ import plugin from '../src/plugin';
 
 const Player = videojs.getComponent('Player');
 
-const classList = plugin => plugin.el().classList;
-const isHidden = plugin => classList(plugin).contains('vjs-hidden');
-const isVisible = plugin => !isHidden(plugin);
+const classList = pluginInstance => pluginInstance.el().classList;
+const isHidden = pluginInstance => classList(pluginInstance).contains('vjs-hidden');
+const isVisible = pluginInstance => !isHidden(pluginInstance);
 const dispatchResizeEvent = (player, size, clock) => {
   player.el().style.width = `${size}px`;
 
-  const event = document.createEvent("HTMLEvents");
-  event.initEvent("scroll", true, false);
+  const event = document.createEvent('HTMLEvents');
+
+  event.initEvent('scroll', true, false);
 
   const detector = player.el().querySelectorAll('.erd_scroll_detection_container')[0];
   const detectNode = detector.childNodes[0].childNodes[0].childNodes[0];
 
   detectNode.dispatchEvent(event);
   clock.tick(1);
-}
+};
 
 QUnit.test('the environment is sane', function(assert) {
   assert.strictEqual(typeof Array.isArray, 'function', 'es5 exists');
@@ -88,8 +89,6 @@ QUnit.test('uses default settings if no settings are passed', function(assert) {
     captionsButton
   } = this.player.controlBar;
 
-  const classList = plugin => plugin.el().classList;
-
   assert.ok(isVisible(currentTimeDisplay));
   assert.ok(isVisible(timeDivider));
   assert.ok(isVisible(durationDisplay));
@@ -120,7 +119,6 @@ QUnit.test('uses default settings for different breakpoints', function(assert) {
   assert.ok(isHidden(captionsButton));
 });
 
-
 QUnit.test('shows and hides plugins depending on video player size', function(assert) {
   assert.expect(2);
 
@@ -138,19 +136,17 @@ QUnit.test('shows and hides plugins depending on video player size', function(as
   assert.ok(isHidden(currentTimeDisplay));
 });
 
-
-
 QUnit.test('allows redefining media queries', function(assert) {
   assert.expect(6);
 
   this.player.width(1000);
   this.player.responsiveControls({
     sizes: {
-      custom: 100,
+      custom: 100
     },
     controls: {
       captionsButton: {
-        custom: false,
+        custom: false
       }
     }
   });
@@ -187,16 +183,16 @@ QUnit.test('allows redefining default value for a single control element', funct
   this.player.responsiveControls({
     controls: {
       captionsButton: {
-        default: false,
+        default: false
       }
     }
   });
 
   this.clock.tick(2);
   const { captionsButton } = this.player.controlBar;
+
   assert.ok(isHidden(captionsButton));
 });
-
 
 QUnit.test('allows redefining behaviour for single controls', function(assert) {
   assert.expect(6);
@@ -206,13 +202,13 @@ QUnit.test('allows redefining behaviour for single controls', function(assert) {
     controls: {
       captionsButton: {
         mini: true,
-        mobile: false,
+        small: false,
         default: true
       },
       remainingTimeDisplay: {
         mini: false,
-        mobile: true,
-        default: false,
+        small: true,
+        default: false
       }
     }
   });
@@ -248,6 +244,7 @@ QUnit.test('allows redefining behaviour for non standard elements', function(ass
   assert.expect(2);
 
   const custom = document.createElement('div');
+
   custom.className = 'vjs-language-container';
   this.player.el().querySelectorAll('.vjs-control-bar')[0].appendChild(custom);
 
@@ -256,7 +253,7 @@ QUnit.test('allows redefining behaviour for non standard elements', function(ass
     controls: {
       'vjs-language-container': {
         mini: false,
-        mobile: false,
+        small: false
       }
     }
   });
@@ -270,6 +267,3 @@ QUnit.test('allows redefining behaviour for non standard elements', function(ass
   dispatchResizeEvent(this.player, 900, this.clock);
   assert.ok(!customSelector.classList.contains('vjs-hidden'));
 });
-
-
-

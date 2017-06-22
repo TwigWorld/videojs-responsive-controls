@@ -32,6 +32,7 @@ export default {
       exports: false
     }),
     resolve({
+      module: true,
       browser: true,
       main: true,
       jsnext: true

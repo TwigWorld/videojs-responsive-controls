@@ -11,7 +11,11 @@ import json from 'rollup-plugin-json';
 export default {
   moduleName: 'videojsResponsiveControls',
   entry: 'src/plugin.js',
-  external: ['video.js'],
+  external: [
+    'video.js',
+    'element-resize-detector',
+    'object.entries'
+  ],
   globals: {
     'video.js': 'videojs'
   },

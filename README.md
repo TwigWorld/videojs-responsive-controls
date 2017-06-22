@@ -36,7 +36,7 @@ import 'videojs-responsive-controls';
 
 player.responsiveControls({
     controls: {
-      remainingTimeDisplay: { mini: false, mobile: false },
+      remainingTimeDisplay: { mini: false, small: false },
       'vjs-resolution-button': { mini: false },
       'vjs-language-container': { mini: false }
     }
@@ -50,7 +50,7 @@ Allows controlling both Video.js native plugins and legacy plugins (via their cl
 Default breakpoints are:
 
 - `mini`: <450px,
-- `mobile`: <600px,
+- `small`: <600px,
 - `default`: any higher resolution
 
 Default settings are:
@@ -67,7 +67,7 @@ durationDisplay: {
 },
 remainingTimeDisplay: {
   mini: false,
-  mobile: false,
+  small: false,
 },
 captionsButton: {
   mini: false,
@@ -104,7 +104,7 @@ you'll have to specify default breakpoints along with your custom ones like so:
 player.responsiveControls({
     sizes: {
         mini: 450,
-        mobile: 600,
+        small: 600,
         custom: 1024,
     },
     controls: {
