@@ -14,7 +14,9 @@ export default {
   entry: 'src/plugin.js',
   dest: 'dist/videojs-responsive-controls.js',
   format: 'umd',
-  external: ['video.js'],
+  external: [
+    'video.js'
+  ],
   globals: {
     'video.js': 'videojs'
   },

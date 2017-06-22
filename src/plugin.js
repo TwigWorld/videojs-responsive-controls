@@ -1,30 +1,31 @@
 import videojs from 'video.js';
 import elementResizeDetectorMaker from 'element-resize-detector';
+import entries from 'object.entries';
 import {version as VERSION} from '../package.json';
 
 // Default options for the plugin.
 const defaults = {
   sizes: {
     mini: 450,
-    mobile: 600,
+    small: 600
   },
   controls: {
     currentTimeDisplay: {
-      mini: false,
+      mini: false
     },
     timeDivider: {
-      mini: false,
+      mini: false
     },
     durationDisplay: {
-      mini: false,
+      mini: false
     },
     remainingTimeDisplay: {
       mini: false,
-      mobile: false,
+      small: false
     },
     captionsButton: {
-      mini: false,
-    },
+      mini: false
+    }
   }
 };
 
@@ -48,26 +49,29 @@ const ascending = (previousSize, nextSize) => previousSize[1] - nextSize[1];
  * @param      {Object}    sizes       Object containing all possible breakpoints.
  * @return     {Function}  The active breakpoints.
  */
-const getActiveBreakpoints = (playerSize, sizes) => (
-  Object.entries(sizes)
+const getActiveBreakpoints = (playerSize, sizes) => {
+  if (!Object.entries) {
+    entries.shim();
+  }
+
+  return Object.entries(sizes)
     .sort(ascending)
-    .filter(size => size[1] >= playerSize)
-)
+    .filter(size => size[1] >= playerSize);
+};
 
 /**
  * Gets the breakpoint name for the current player's size
  *
  * @param      {Player}   player  Video.js player object.
  * @param      {Object}   sizes   Object containing all possible breakpoints.
- * @return     {String}   Breakpoint name.
+ * @return     {string}   Breakpoint name.
  */
 const getPlayerSize = (player, sizes) => {
   const playerSize = player.el().clientWidth;
   const breakpoints = getActiveBreakpoints(playerSize, sizes);
 
   return breakpoints[0] ? breakpoints[0][0] : 'default';
-}
-
+};
 
 /**
  * Controls should be visible by default so this function checks if
@@ -83,7 +87,7 @@ const trueByDefault = setting => typeof setting !== 'undefined' ? !!setting : tr
  * in player.controlBar.
  *
  * @param      {Player}   player   Video.js player object.
- * @param      {String}   control  Name of the plugin.
+ * @param      {string}   control  Name of the plugin.
  * @return     {boolean}  True if native, False otherwise.
  */
 const isNative = (player, control) => typeof player.controlBar[control] === 'object';
@@ -94,42 +98,43 @@ const isNative = (player, control) => typeof player.controlBar[control] === 'obj
  * @param      {Player}   player   Video.js player object.
  * @param      {Object}   control  The element to trigger.
  * @param      {boolean}  show     Desired state.
- * @return     {Function}
+ * @return     {Function} Control element
  */
 const setNative = (player, control, show) => {
   const target = player.controlBar[control];
+
   return show ? target.show() : target.hide();
-}
+};
 
 /**
  * Uses CSS to hide or show custom element. Useful for legacy plugins that
  * do not follow official plugin structure.
  *
  * @param      {Player}     player      Video.js player object.
- * @param      {String}     className   Class of the element to trigger.
+ * @param      {string}     className   Class of the element to trigger.
  * @param      {boolean}    show        Desired state.
- * @return     {(DOMElement|undefined)}
+ * @return     {(DOMElement|undefined)} Control element
  */
 const setCustom = (player, className, show) => {
   const target = player.el().querySelectorAll(`.${className}`);
   const hiddenClass = 'vjs-hidden';
 
   if (target.length === 0) {
-      return undefined;
+    return undefined;
   }
 
   return show ? target[0].classList.remove(hiddenClass) :
                 target[0].classList.add(hiddenClass);
-}
+};
 
 /**
  * Applies specified settingf to the control element based on video player's size
  *
  * @param      {Player}         player   Video.js player object.
- * @param      {Object|String}  control  Video.js plugin instance or class name.
+ * @param      {Object|string}  control  Video.js plugin instance or class name.
  * @param      {boolean}        setting  Indites if the control element should be visible
  *                                       on given breakpoint.
- * @return     {Function}
+ * @return     {(DOMElement|Object)} Control element
  */
 const set = (player, control, setting) => {
   const target = trueByDefault(setting);
@@ -137,7 +142,7 @@ const set = (player, control, setting) => {
 
   return native ? setNative(player, control, target) :
                   setCustom(player, control, target);
-}
+};
 
 /**
  * Applies specified settings to the video player based on it's size
@@ -145,7 +150,8 @@ const set = (player, control, setting) => {
  * @param      {Player}  player         Video.js player object.
  * @param      {Object}  arg2           Settings object
  * @param      {Object}  arg2.sizes     Breakpoints on which the controls will update.
- * @param      {Object}  arg2.controls  Specifies states of all the controls for different breakpoints.
+ * @param      {Object}  arg2.controls  Specifies states of all the controls
+ *                                      for different breakpoints.
  * @return     {undefined}
  */
 const setup = (player, { sizes, controls }) => {
@@ -153,9 +159,10 @@ const setup = (player, { sizes, controls }) => {
 
   for (const control in controls) {
     const setting = controls[control][size];
+
     set(player, control, setting);
   }
-}
+};
 
 /**
  * Initializes new instance of resize detector
@@ -163,18 +170,18 @@ const setup = (player, { sizes, controls }) => {
  * @return     {ElementResizeDetector} Detector instance
  */
 const newDetector = () => {
-  return elementResizeDetectorMaker({ strategy: "scroll" });
-}
+  return elementResizeDetectorMaker({ strategy: 'scroll' });
+};
 
 /**
  * Overwrites default breakpoints with ones specified by the developer.
  *
  * @param      {Object}  settings  Settings passed on initialisation.
- * @param      {Object}  defaults  Default settings for plugin.
+ * @param      {Object}  defaultSettings  Default settings for plugin.
  * @return     {Object}  Settings to be applied.
  */
-const getMediaQueries = (settings, defaults) => (
-  settings && settings.sizes ? settings.sizes : defaults.sizes
+const getMediaQueries = (settings, defaultSettings) => (
+  settings && settings.sizes ? settings.sizes : defaultSettings.sizes
 );
 
 /**
@@ -182,14 +189,14 @@ const getMediaQueries = (settings, defaults) => (
  * specified by the developer.
  *
  * @param      {Object}  settings  Settings paased on initialisation.
- * @param      {Object}  defaults  Default settings for plugin.
+ * @param      {Object}  defaultSettings  Default settings for plugin.
  * @return     {Object}  Settings to be applied.
  */
-const mergeUserSettings = (settings, defaults) => (
+const mergeUserSettings = (settings, defaultSettings) => (
   settings && settings.controls ?
-  videojs.mergeOptions(defaults.controls, settings.controls) :
-  defaults.controls
-)
+  videojs.mergeOptions(defaultSettings.controls, settings.controls) :
+  defaultSettings.controls
+);
 
 /**
  * A video.js plugin.
@@ -200,18 +207,18 @@ const mergeUserSettings = (settings, defaults) => (
  * to you; if not, remove the wait for "ready"!
  *
  * @function responsiveControls
- * @param    {Object} [options={}]
+ * @param    {Object} [userSettings={}]
  *           An object of options left to the plugin author to define.
  */
 const responsiveControls = function(userSettings) {
   const settings = {
     sizes: getMediaQueries(userSettings, defaults),
-    controls: mergeUserSettings(userSettings, defaults),
+    controls: mergeUserSettings(userSettings, defaults)
   };
 
   this.addClass('vjs-responsive-controls');
-  window.resizeDetector = window.resizeDetector || newDetector();
-  window.resizeDetector.listenTo(this.el(), () => setup(this, settings));
+  this.resizeDetector = this.resizeDetector || newDetector();
+  this.resizeDetector.listenTo(this.el(), () => setup(this, settings));
 };
 
 // Register the plugin with video.js.

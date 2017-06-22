@@ -1,6 +1,6 @@
 {
   "name": "videojs-responsive-controls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Adapts controls to different player sizes",
   "main": "dist/videojs-responsive-controls.cjs.js",
   "module": "dist/videojs-responsive-controls.es.js",
@@ -64,6 +64,7 @@
     "element-resize-detector": "^1.1.12",
     "global": "^4.3.2",
     "lodash": "^4.17.4",
+    "object.entries": "^1.0.4",
     "video.js": "^5.19.2"
   },
   "devDependencies": {
