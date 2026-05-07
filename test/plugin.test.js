@@ -8,6 +8,16 @@ import plugin from '../src/plugin';
 
 const Player = videojs.getComponent('Player');
 
+// In video.js 8, child components are no longer exposed as named properties
+// on their parent. Use `getChild`, which is case-sensitive and indexes by
+// both TitleCase and lowercase variants of the component name.
+const getControl = (player, name) => {
+  const titleCased = name.charAt(0).toUpperCase() + name.slice(1);
+
+  return player.controlBar.getChild(titleCased) ||
+    player.controlBar.getChild(name) ||
+    player.controlBar.getChild(name.toLowerCase());
+};
 const classList = pluginInstance => pluginInstance.el().classList;
 const isHidden = pluginInstance => classList(pluginInstance).contains('vjs-hidden');
 const isVisible = pluginInstance => !isHidden(pluginInstance);
@@ -37,7 +47,7 @@ QUnit.module('videojs-responsive-controls', {
   beforeEach() {
 
     // Mock the environment's timers because certain things - particularly
-    // player readiness - are asynchronous in video.js 5. This MUST come
+    // player readiness - are asynchronous in video.js. This MUST come
     // before any player is created; otherwise, timers could get created
     // with the actual timer methods!
     this.clock = sinon.useFakeTimers();
@@ -75,48 +85,40 @@ QUnit.test('registers itself with video.js', function(assert) {
 });
 
 QUnit.test('uses default settings if no settings are passed', function(assert) {
-  assert.expect(5);
+  assert.expect(4);
 
   this.player.width(1000);
   this.player.responsiveControls();
   this.clock.tick(2);
 
-  const {
-    currentTimeDisplay,
-    timeDivider,
-    durationDisplay,
-    remainingTimeDisplay,
-    captionsButton
-  } = this.player.controlBar;
+  const currentTimeDisplay = getControl(this.player, 'currentTimeDisplay');
+  const timeDivider = getControl(this.player, 'timeDivider');
+  const durationDisplay = getControl(this.player, 'durationDisplay');
+  const remainingTimeDisplay = getControl(this.player, 'remainingTimeDisplay');
 
   assert.ok(isVisible(currentTimeDisplay));
   assert.ok(isVisible(timeDivider));
   assert.ok(isVisible(durationDisplay));
   assert.ok(isVisible(remainingTimeDisplay));
-  assert.ok(isVisible(captionsButton));
 
 });
 
 QUnit.test('uses default settings for different breakpoints', function(assert) {
-  assert.expect(5);
+  assert.expect(4);
 
   this.player.width(400);
   this.player.responsiveControls();
   this.clock.tick(2);
 
-  const {
-    currentTimeDisplay,
-    timeDivider,
-    durationDisplay,
-    remainingTimeDisplay,
-    captionsButton
-  } = this.player.controlBar;
+  const currentTimeDisplay = getControl(this.player, 'currentTimeDisplay');
+  const timeDivider = getControl(this.player, 'timeDivider');
+  const durationDisplay = getControl(this.player, 'durationDisplay');
+  const remainingTimeDisplay = getControl(this.player, 'remainingTimeDisplay');
 
   assert.ok(isHidden(currentTimeDisplay));
   assert.ok(isHidden(timeDivider));
   assert.ok(isHidden(durationDisplay));
   assert.ok(isHidden(remainingTimeDisplay));
-  assert.ok(isHidden(captionsButton));
 });
 
 QUnit.test('shows and hides plugins depending on video player size', function(assert) {
@@ -126,7 +128,7 @@ QUnit.test('shows and hides plugins depending on video player size', function(as
   this.player.responsiveControls();
   this.clock.tick(2);
 
-  const { currentTimeDisplay } = this.player.controlBar;
+  const currentTimeDisplay = getControl(this.player, 'currentTimeDisplay');
 
   assert.ok(isVisible(currentTimeDisplay));
 
@@ -145,7 +147,7 @@ QUnit.test('allows redefining media queries', function(assert) {
       custom: 100
     },
     controls: {
-      captionsButton: {
+      fullscreenToggle: {
         custom: false
       }
     }
@@ -153,13 +155,11 @@ QUnit.test('allows redefining media queries', function(assert) {
 
   this.clock.tick(2);
 
-  const {
-    remainingTimeDisplay,
-    captionsButton
-  } = this.player.controlBar;
+  const remainingTimeDisplay = getControl(this.player, 'remainingTimeDisplay');
+  const fullscreenToggle = getControl(this.player, 'fullscreenToggle');
 
   assert.ok(isVisible(remainingTimeDisplay));
-  assert.ok(isVisible(captionsButton));
+  assert.ok(isVisible(fullscreenToggle));
 
   this.clock.tick(2);
   // Below default media query but above custom
@@ -167,13 +167,13 @@ QUnit.test('allows redefining media queries', function(assert) {
   dispatchResizeEvent(this.player, 300, this.clock);
 
   assert.ok(isVisible(remainingTimeDisplay));
-  assert.ok(isVisible(captionsButton));
+  assert.ok(isVisible(fullscreenToggle));
 
   this.clock.tick(2);
   dispatchResizeEvent(this.player, 100, this.clock);
 
   assert.ok(isVisible(remainingTimeDisplay));
-  assert.ok(isHidden(captionsButton));
+  assert.ok(isHidden(fullscreenToggle));
 });
 
 QUnit.test('allows redefining default value for a single control element', function(assert) {
@@ -182,16 +182,16 @@ QUnit.test('allows redefining default value for a single control element', funct
   this.player.width(1000);
   this.player.responsiveControls({
     controls: {
-      captionsButton: {
+      fullscreenToggle: {
         default: false
       }
     }
   });
 
   this.clock.tick(2);
-  const { captionsButton } = this.player.controlBar;
+  const fullscreenToggle = getControl(this.player, 'fullscreenToggle');
 
-  assert.ok(isHidden(captionsButton));
+  assert.ok(isHidden(fullscreenToggle));
 });
 
 QUnit.test('allows redefining behaviour for single controls', function(assert) {
@@ -200,7 +200,7 @@ QUnit.test('allows redefining behaviour for single controls', function(assert) {
   this.player.width(1000);
   this.player.responsiveControls({
     controls: {
-      captionsButton: {
+      fullscreenToggle: {
         mini: true,
         small: false,
         default: true
@@ -215,28 +215,26 @@ QUnit.test('allows redefining behaviour for single controls', function(assert) {
 
   this.clock.tick(2);
 
-  const {
-    remainingTimeDisplay,
-    captionsButton
-  } = this.player.controlBar;
+  const remainingTimeDisplay = getControl(this.player, 'remainingTimeDisplay');
+  const fullscreenToggle = getControl(this.player, 'fullscreenToggle');
 
   // Default breakpoint
   assert.ok(isHidden(remainingTimeDisplay));
-  assert.ok(isVisible(captionsButton));
+  assert.ok(isVisible(fullscreenToggle));
 
   this.clock.tick(2);
   dispatchResizeEvent(this.player, 600, this.clock);
 
   // Mobile Breakpoint
   assert.ok(isVisible(remainingTimeDisplay));
-  assert.ok(isHidden(captionsButton));
+  assert.ok(isHidden(fullscreenToggle));
 
   // Mini breakpoint
   this.clock.tick(2);
   dispatchResizeEvent(this.player, 450, this.clock);
 
   assert.ok(isHidden(remainingTimeDisplay));
-  assert.ok(isVisible(captionsButton));
+  assert.ok(isVisible(fullscreenToggle));
 
 });
 

@@ -1,7 +1,6 @@
 import videojs from 'video.js';
 import elementResizeDetectorMaker from 'element-resize-detector';
 import entries from 'object.entries';
-import {version as VERSION} from '../package.json';
 
 // Default options for the plugin.
 const defaults = {
@@ -23,15 +22,11 @@ const defaults = {
       mini: false,
       small: false
     },
-    captionsButton: {
+    subsCapsButton: {
       mini: false
     }
   }
 };
-
-// // Cross-compatibility for Video.js 5 and 6.
-const registerPlugin = videojs.registerPlugin || videojs.plugin;
-// // const dom = videojs.dom || videojs;
 
 /**
  * Ascending sorting for breakpoints
@@ -83,25 +78,50 @@ const getPlayerSize = (player, sizes) => {
 const trueByDefault = setting => typeof setting !== 'undefined' ? !!setting : true;
 
 /**
+ * Retrieves a named child component from the control bar.
+ *
+ * Video.js 8 no longer exposes child components as direct properties on their
+ * parent (`player.controlBar.playToggle`). Children must be looked up via
+ * `getChild`, which accepts both camelCase and PascalCase names.
+ *
+ * @param      {Player}   player   Video.js player object.
+ * @param      {string}   control  Name of the control component.
+ * @return     {(Component|undefined)}  The child component, if registered.
+ */
+const getNativeControl = (player, control) => {
+  const controlBar = player.controlBar;
+
+  if (!controlBar || typeof controlBar.getChild !== 'function' || !control) {
+    return undefined;
+  }
+
+  const titleCased = control.charAt(0).toUpperCase() + control.slice(1);
+
+  return controlBar.getChild(titleCased) ||
+    controlBar.getChild(control) ||
+    controlBar.getChild(control.toLowerCase());
+};
+
+/**
  * Determines if given control is a native Video.js plugin by searching for it
- * in player.controlBar.
+ * on the control bar's child index.
  *
  * @param      {Player}   player   Video.js player object.
  * @param      {string}   control  Name of the plugin.
  * @return     {boolean}  True if native, False otherwise.
  */
-const isNative = (player, control) => typeof player.controlBar[control] === 'object';
+const isNative = (player, control) => !!getNativeControl(player, control);
 
 /**
  * Uses Video.js API to hide or show Video.js plugin.
  *
  * @param      {Player}   player   Video.js player object.
- * @param      {Object}   control  The element to trigger.
+ * @param      {string}   control  Name of the native control component.
  * @param      {boolean}  show     Desired state.
  * @return     {Function} Control element
  */
 const setNative = (player, control, show) => {
-  const target = player.controlBar[control];
+  const target = getNativeControl(player, control);
 
   return show ? target.show() : target.hide();
 };
@@ -124,7 +144,7 @@ const setCustom = (player, className, show) => {
   }
 
   return show ? target[0].classList.remove(hiddenClass) :
-                target[0].classList.add(hiddenClass);
+    target[0].classList.add(hiddenClass);
 };
 
 /**
@@ -141,7 +161,7 @@ const set = (player, control, setting) => {
   const native = isNative(player, control);
 
   return native ? setNative(player, control, target) :
-                  setCustom(player, control, target);
+    setCustom(player, control, target);
 };
 
 /**
@@ -194,8 +214,8 @@ const getMediaQueries = (settings, defaultSettings) => (
  */
 const mergeUserSettings = (settings, defaultSettings) => (
   settings && settings.controls ?
-  videojs.mergeOptions(defaultSettings.controls, settings.controls) :
-  defaultSettings.controls
+    videojs.obj.merge(defaultSettings.controls, settings.controls) :
+    defaultSettings.controls
 );
 
 /**
@@ -222,9 +242,9 @@ const responsiveControls = function(userSettings) {
 };
 
 // Register the plugin with video.js.
-registerPlugin('responsiveControls', responsiveControls);
+videojs.registerPlugin('responsiveControls', responsiveControls);
 
 // Include the version number.
-responsiveControls.VERSION = VERSION;
+responsiveControls.VERSION = '__VERSION__';
 
 export default responsiveControls;
