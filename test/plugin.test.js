@@ -121,6 +121,22 @@ QUnit.test('uses default settings for different breakpoints', function(assert) {
   assert.ok(isHidden(remainingTimeDisplay));
 });
 
+QUnit.test('hides subsCapsButton at mini breakpoint and shows it above', function(assert) {
+  assert.expect(2);
+
+  this.player.width(400);
+  this.player.responsiveControls();
+  this.clock.tick(2);
+
+  const subsCapsButton = getControl(this.player, 'subsCapsButton');
+
+  assert.ok(isHidden(subsCapsButton), 'hidden below the mini breakpoint');
+
+  dispatchResizeEvent(this.player, 1000, this.clock);
+
+  assert.ok(isVisible(subsCapsButton), 'visible above the mini breakpoint');
+});
+
 QUnit.test('shows and hides plugins depending on video player size', function(assert) {
   assert.expect(2);
 
