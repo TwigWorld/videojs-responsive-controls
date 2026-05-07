@@ -5,15 +5,20 @@ module.exports = function(config) {
   // see https://github.com/videojs/videojs-generate-karma-config
   // for options
   const options = {
-    browsers(aboutToRun) {
-      // only run ChromeHeadless to avoid flaky Safari/Firefox detection
-      return aboutToRun.filter(function(launcherName) {
-        return (/^ChromeHeadless/).test(launcherName);
-      });
-    }
+    // Only run in ChromeHeadlessNoSandbox so Safari / Firefox aren't
+    // auto-launched by karma-detect-browsers on developer machines, and
+    // Chrome launches cleanly inside the CI container (which runs as root).
+    browsers: () => ['ChromeHeadlessNoSandbox']
   };
 
   config = generate(config, options);
 
-  // any other custom stuff not supported by options here!
+  config.set({
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    }
+  });
 };
